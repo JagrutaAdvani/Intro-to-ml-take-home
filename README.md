@@ -20,11 +20,11 @@
 
 ## 🌿 Visual Storytelling Part 1: Green Buildings
 ### 📝 Solution
-- [Green Building](3.%20Visual%20story%20telling%20part%201:%20green%20buildings/Q3.ipynb)
+- [Green Building](3.%20Visual%20storytelling%20part%201:%20green%20buildings/Q3.ipynb)
 
 ## 🚋 Visual Storytelling Part 2: Capital Metro Data
 ### 📝 Solution
-- [Capital Metro](4.%20Visual%20story%20telling%20part%202:%20Capital%20Metro%20data/IML_HW_Q4.ipynb)
+- [Capital Metro](4.%20Visual%20storytelling%20part%202:%20Capital%20Metro%20data/IML_HW_Q4.ipynb)
 
 
 ## 🍷 Clustering and Dimensionality Reduction
