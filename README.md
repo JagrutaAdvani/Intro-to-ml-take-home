@@ -35,7 +35,7 @@
 
 ## 🎯 Market Segmentation
 ### 📝 Solution
-- [Market Segmentation](6.%20Market%20segmentation/Q6.ipynb)
+- [Market Segmentation] (6.%20Market%20segmentation/Q6.ipynb)
 
 ## 📰 The Reuters Corpus
 ### 📝 Solution
