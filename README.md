@@ -15,8 +15,8 @@
 
 ## 🎶 Wrangling the Billboard Top 100
 ### 📝 Solution
-- [Wrangling the Billboard Top 100 Solution](2.%20Wrangling%20the%20Billboard%20Top%20100/Q2_ML.Rmd)
-- [Wrangling the Billboard Top 100 PDF]()
+- [Wrangling the Billboard Top 100 Solution](2.%20Wrangling%20the%20Billboard%20Top%20100/Q2_ML.Rmd))
+- [Wrangling the Billboard Top 100 PDF](2.%20Wrangling%20the%20Billboard%20Top%20100/Question%202%20Wrangling%20the%20Billboard%20Top%20100.pdf)
 
 ## 🌿 Visual Storytelling Part 1: Green Buildings
 ### 📝 Solution
@@ -39,7 +39,7 @@
 
 ## 📰 The Reuters Corpus
 ### 📝 Solution
-- [The Reuters Corpus](6.%20The%20Reuters%20corpus/ReutersCorpus.ipynb)
+- [The Reuters Corpus]()
 
 
 ## 🛒 Association Rule Mining
@@ -50,4 +50,4 @@
 
 ## 🖼️ Image Classification with Neural Networks
 ### 📝 Solution
- - [Image Classification with Neural Networks](8.%20Image%20classification%20with%20neural%20networks/Image%20classification%20with%20neural%20networks.ipynb)
+ - [Image Classification with Neural Networks](9.%20Image%20classification%20with%20neural%20networks/IML_HW_Q9.ipynb)

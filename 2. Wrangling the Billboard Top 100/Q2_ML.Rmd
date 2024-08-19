@@ -1,6 +1,8 @@
 ---
-title: "Question 2 Wrangling the Billboard Top 100" _ Group - Dhruv Arora, Milan Vaghani, Pratyush Rohilla, Jagruta Advani
-output: html_notebook
+title: "Question 2 Wrangling the Billboard Top 100"
+output:
+  html_document:
+    df_print: paged
 ---
 
 #### Wrangling the Billboard Top 100 #### 
@@ -22,7 +24,6 @@ library(ggplot2)
 billboard <- read.csv("/Users/jagrutaadvani/Downloads/billboard.csv")
 
 # Preview the dataframe
-View(billboard)
 head(billboard)
 summary(billboard)
 ```
