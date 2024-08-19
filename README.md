@@ -39,7 +39,7 @@
 
 ## 📰 The Reuters Corpus
 ### 📝 Solution
-- [The Reuters Corpus]()
+- [The Reuters Corpus](7.%20The%20Reuters%20corpus/)
 
 
 ## 🛒 Association Rule Mining
