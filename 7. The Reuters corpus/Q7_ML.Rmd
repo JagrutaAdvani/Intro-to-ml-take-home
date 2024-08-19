@@ -1,0 +1,248 @@
+---
+title: "Q7"
+author: "JAGRUTA"
+date: "2024-08-19"
+output:
+  pdf_document:
+    df_print: paged
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+QUESTION 7
+
+Revisit the Reuters C50 text corpus that we briefly explored in class. Your task is simple: tell an interesting story, anchored in some analytical tools we have learned in this class, using this data. For example:
+
+you could cluster authors or documents and tell a story about what you find.
+you could look for common factors using PCA.
+you could train a predictive model and assess its accuracy, constructing features for each document that maximize performance.
+you could do anything else that strikes you as interesting with this data.
+Describe clearly what question you are trying to answer, what models you are using, how you pre-processed the data, and so forth. Make sure you include at least one really interesting plot (although more than one might be necessary, depending on your question and approach.)
+
+Format your write-up in the following sections, some of which might be quite short:
+
+Question: What question(s) are you trying to answer?
+Approach: What approach/statistical tool did you use to answer the questions?
+Results: What evidence/results did your approach provide to answer the questions? (E.g. any numbers, tables, figures as appropriate.)
+Conclusion: What are your conclusions about your questions? Provide a written interpretation of your results, understandable to stakeholders who might plausibly take an interest in this data set.
+Regarding the data itself: In the C50train directory, you have 50 articles from each of 50 different authors (one author per directory). Then in the C50test directory, you have another 50 articles from each of those same 50 authors (again, one author per directory). This train/test split is obviously intended for building predictive models, but to repeat, you need not do that on this problem. You can tell any story you want using any methods you want. Just make it compelling!
+
+Note: if you try to build a predictive model, you will need to figure out a way to deal with words in the test set that you never saw in the training set. This is a nontrivial aspect of the modeling exercise. (E.g. you might simply ignore those new words.)
+
+This question will be graded according to three criteria:
+
+the overall "interesting-ness" of your question and analysis.
+the clarity of your description. We will be asking ourselves: could your analysis be reproduced by a competent data scientist based on what you've said? (That's good.) Or would that person have to wade into the code in order to understand what, precisely, you've done? (That's bad.)
+technical correctness (i.e. did you make any mistakes in execution or interpretation?)
+---
+```{r}
+library(tm) 
+library(dplyr)
+library(SnowballC)
+```
+
+#The Questions we are answering:
+
+How can we identify the dominant themes within the document corpus?
+Which authors are considered authorities on specific topics within the collection?
+
+
+# Step 1: Load the data
+The data is in the "C50train" and "C50test" directories sourced from github
+
+
+```{r}
+train_dir <- "/Users/jagrutaadvani/Downloads/jgscott-STA380-691d1b0/data/ReutersC50/C50train"
+test_dir <- "/Users/jagrutaadvani/Downloads/jgscott-STA380-691d1b0/data/ReutersC50/C50test"
+
+# Function to read documents
+
+load_corpus <- function(dir) {
+  authors <- list.dirs(dir, full.names = FALSE, recursive = FALSE)
+  article_paths <- unlist(lapply(list.dirs(dir, recursive = TRUE)[-1], list.files, full.names = TRUE))
+  author_names <- rep(authors, each = 50)
+  
+  articles <- lapply(article_paths, function(article) {
+    readPlain(elem = list(content = readLines(article)), id = article, language = 'en')
+  })
+  
+  article_names <- gsub(".*/|\\.txt$", "", article_paths)
+  names(articles) <- article_names
+  
+  return(list(articles = articles, author_names = author_names))
+}
+
+# Load train and test data
+train_data <- load_corpus(train_dir)
+test_data <- load_corpus(test_dir)
+```
+
+# Step 2: Clean and Preprocess data
+
+
+```{r}
+ConvertStrings <- function(textInput) {
+  textOutput <- gsub("^.{13}|.{196}$", "", textInput)
+  return(textOutput)
+}
+
+preprocess_corpus <- function(corpus) {
+  corpus <- tm_map(corpus, content_transformer(tolower))
+  corpus <- tm_map(corpus, removeNumbers)
+  corpus <- tm_map(corpus, removePunctuation)
+  corpus <- tm_map(corpus, stripWhitespace)
+  corpus <- tm_map(corpus, removeWords, stopwords("en"))
+  corpus <- tm_map(corpus, content_transformer(ConvertStrings))
+  return(corpus)
+}
+
+train_corpus <- preprocess_corpus(Corpus(VectorSource(train_data$articles)))
+test_corpus <- preprocess_corpus(Corpus(VectorSource(test_data$articles)))
+```
+
+# Step 3: Document Term Matrix for train and test
+
+```{r}
+dtm_train <- DocumentTermMatrix(train_corpus)
+dtm_test <- DocumentTermMatrix(test_corpus)
+
+inspect(dtm_train)
+inspect(dtm_test)
+```
+
+
+#Step 4: Remove Sparse Terms
+
+```{r}
+dtm_train <- removeSparseTerms(dtm_train, 0.94)
+dtm_test <- removeSparseTerms(dtm_test, 0.94)
+```
+
+#Step 5: Create Frequency Data Frames and Display top frequent words
+
+```{r}
+dtm_train_freq <- as.data.frame(as.matrix(dtm_train))
+dtm_test_freq <- as.data.frame(as.matrix(dtm_test))
+findFreqTerms(dtm_train, 500)
+findFreqTerms(dtm_test, 500)
+```
+
+Step 6: Word Frequency Analysis, Word Cloud and common words between Train and Test
+
+```{r}
+intersect(findFreqTerms(dtm_train, 750), findFreqTerms(dtm_test, 750))
+freq_train <- colSums(dtm_train_freq)
+freq_test <- colSums(dtm_test_freq)
+
+# Top 5 words in train and test datasets
+top_train <- sort(freq_train, decreasing = TRUE)[1:5]
+top_test <- sort(freq_test, decreasing = TRUE)[1:5]
+
+top_train
+top_test
+
+# Plot words
+library(ggplot2)
+
+wf_train <- data.frame(term = names(freq_train), occurrences = freq_train)
+p <- ggplot(subset(wf_train, occurrences > 1500), aes(term, occurrences))
+p + geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+library(wordcloud)
+set.seed(10)
+
+minDocFreq <- length(train_corpus) * 0.01
+maxDocFreq <- length(train_corpus) * 0.9
+
+dtm_filtered <- DocumentTermMatrix(train_corpus, control = list(bounds = list(global = c(minDocFreq, maxDocFreq))))
+freq_filtered <- colSums(as.matrix(dtm_filtered))
+
+wordcloud(names(freq_filtered), freq_filtered, min.freq = 1200, colors = brewer.pal(8, "Dark2"), scale = c(3, .5))
+```
+```{r}
+min_freq <- 1200
+freq_filtered <- sort(freq_filtered, decreasing = TRUE)
+freq_data <- data.frame(term = names(freq_filtered), occurrences = freq_filtered)
+freq_data <- freq_data[freq_data$occurrences > min_freq, ]
+
+# Create a bar plot
+ggplot(freq_data, aes(x = reorder(term, -occurrences), y = occurrences)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Most Frequent Words in the Corpus", x = "Terms", y = "Frequency")
+```
+
+Step 7: Topic Modelling with LDA - UNSUPERVISED LEARNING
+
+Frequency Count Matrix
+
+```{r}
+library(topicmodels)
+
+# Additional Stopword Removal
+myStopwords <- c("can", "say", "one", "use", "also", "however", "will", "much", "need", "take", "even", "like", "said", "well", "make", "new", "good", "day", "etc")
+train_corpus <- tm_map(train_corpus, removeWords, myStopwords)
+test_corpus <- tm_map(test_corpus, removeWords, myStopwords)
+
+dtm_train <- DocumentTermMatrix(train_corpus, control = list(bounds = list(global = c(minDocFreq, maxDocFreq))))
+dtm_test <- DocumentTermMatrix(test_corpus, control = list(bounds = list(global = c(minDocFreq, maxDocFreq))))
+
+# LDA with k = 8
+lda_model <- LDA(dtm_train, k = 8, method = "Gibbs", control = list(seed = 1234, burnin = 2000, iter = 2000, thin = 500))
+lda_terms <- terms(lda_model, 10)
+lda_terms
+
+```
+
+Step 8: PCA for Dimensionality Reduction
+The graph below shows the variance on increasing the components and we can observe that giving 1000 principal components gives optimal values
+
+```{r}
+pca <- prcomp(as.matrix(dtm_train), scale. = TRUE)
+
+plot(cumsum(pca$sdev^2 / sum(pca$sdev^2)), ylab = "Cumulative Variance Explained", xlab = "Number of Principal Components")
+
+train_pca <- data.frame(pca$x[, 1:1000])
+train_pca$author <- train_data$author_names
+
+# Apply PCA to test set
+test_pca <- predict(pca, data = as.matrix(dtm_test))
+test_pca <- data.frame(test_pca[, 1:1000])
+test_pca$author <- test_data$author_names
+
+```
+
+
+Step 13: Random Forest - Supervised Learning
+
+
+```{r}
+library(randomForest)
+set.seed(10)
+rf<-randomForest(as.factor(author)~.,data=train_pca, mtry=6,importance=TRUE,trees = 100)
+pred<-predict(rf,data=test_pca)
+table.rf<-as.data.frame(table(pred,as.factor(test_pca$author)))
+predicted<-pred
+output<-as.factor(test_pca$author)
+results<-as.data.frame(cbind(output,predicted))
+results$flag<-ifelse(results$output==results$predicted,1,0)
+sum(results$flag)/nrow(results)
+```
+
+*** Analysis and Conclusion ***
+
+Approach:
+Data Preparation: Loaded and preprocessed the text data by cleaning and creating a Document-Term Matrix (DTM).
+Topic Modeling: Applied Latent Dirichlet Allocation (LDA) to identify common themes within the documents.
+Dimensionality Reduction: Used Principal Component Analysis (PCA) to simplify the DTM.
+Classification: Implemented a Random Forest model to classify documents by author.
+
+Results:
+LDA revealed distinct topics, highlighting the diversity in author writing styles.
+PCA efficiently reduced data dimensions while retaining significant features.
+The Random Forest model achieved a strong accuracy of 70.28%, effectively distinguishing authors.
+
+Conclusion:
+The analysis successfully demonstrated the potential of combining unsupervised and supervised learning techniques to analyze and classify text data. Through topic modeling, we identified meaningful themes within the corpus, offering insights into the writing styles and subject matter focus of different authors. The Random Forest classifier, trained on PCA-reduced data, provided a robust method for author identification, achieving a high accuracy.

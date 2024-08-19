@@ -33,7 +33,8 @@
 
 ## 📰 The Reuters Corpus
 ### 📝 Solution
-- [The Reuters Corpus](7.%20The%20Reuters%20corpus/)
+- [The Reuters Corpus Solution](7.%20The%20Reuters%20corpus/Q7_ML.Rmd)
+- [The Reuters Corpus Solution](7.%20The%20Reuters%20corpus/Q7_ML.pdf)
 
 ## 🛒 Association Rule Mining
 ### 📝 Solution
