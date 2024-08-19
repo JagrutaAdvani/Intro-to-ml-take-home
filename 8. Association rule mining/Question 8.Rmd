@@ -1,0 +1,179 @@
+---
+title: "Question 8"
+output: html_document
+date: "2024-08-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Q8 \~ Association rule mining
+
+```{r , echo=FALSE,warning=FALSE}
+library(arules)
+library(arulesViz)
+library(tidyverse)
+library(xtable)
+library(ggplot2)
+library(igraph)
+groceries <- read.transactions("./groceries.txt", format = c("basket"), sep = ",", rm.duplicates = FALSE)
+```
+
+```{r}
+summary(groceries)
+```
+
+```{r}
+item_freq <- itemFrequency(groceries, type = "absolute")
+
+top_items <- sort(item_freq, decreasing = TRUE)[1:20]
+barplot(top_items, las = 2, cex.names = 0.6, main = "Top 20 Items in Groceries")
+```
+
+#### From the summary of groceries, we can see that the most frequent items bought are:
+
+|       Item       | No. of times bought |
+|:----------------:|:-------------------:|
+|    Whole Milk    |        2513         |
+| Other Vegetables |        1903         |
+|    Rolls/buns    |        1809         |
+|       Soda       |        1715         |
+
+### I have picked following thresholds:
+
+#### Support = 0.5 percent
+
+To identify commonly purchased combinations of items, support value of 0.5% can be a good fit
+
+#### Confidence = 0.20
+
+Confidence value should be a good mix of neither too small and neither too high as then it might not truly capture correlated baskets or may limit us to a very narrow scope. Therefore, confidence of 20% can be a good fit here
+
+#### MaxLength = 3
+
+Most of the dishes have nearly 3 core ingredients so maxlength of 3 can be a good fit as we should have some correlation in the baskets of such size.
+
+### Applying Apriori to find frequent item sets.
+
+```{r , echo=FALSE,warning=FALSE,include=FALSE}
+grocery_rule <- apriori(groceries, 
+                         parameter=list(support=.005, confidence=.20, maxlen=3))
+grocery_rule_df <- data.frame(
+                        lhs = labels(lhs(grocery_rule)),
+                        rhs = labels(rhs(grocery_rule)), 
+                        grocery_rule@quality)
+```
+
+```{r}
+top_30_rules <- grocery_rule[1:30]
+inspect(top_30_rules)
+```
+
+```{r}
+summary(grocery_rule)
+
+```
+
+```{r , echo=FALSE,warning=FALSE}
+top_10_conf<- grocery_rule_df %>% arrange(-confidence) %>% top_n(10,wt=confidence)
+
+top_10_conf_df <- as.data.frame(top_10_conf)                  
+top_10_conf_df 
+ggplot(top_10_conf_df,                             
+       aes(x = lhs,
+           y = confidence)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+```{r , echo=FALSE,warning=FALSE}
+bottom_10_conf<- grocery_rule_df %>% arrange(-confidence) %>% top_n(-10,wt=confidence)
+
+bottom_10_conf_df <- as.data.frame(bottom_10_conf)                  
+bottom_10_conf_df 
+ggplot(bottom_10_conf_df,                             
+       aes(x = lhs,
+           y = confidence)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+The most frequent individual items is whole milk and have high support values, indicating its prevalence in the transactions. The lift value of 1.0 indicates that whole milk is purchased independently, as its presence or absence doesn’t influence each other.
+
+**{butter,yogurt} =\> {whole milk}:** Customers buying “butter” and "yogurt" are likely to buy “whole milk” with a confidence of 63.88%, suggesting a common combination, while the support for {whole milk} individually is just 25.5%
+
+Milk shows up the most on rhs with high confidence meaning shoppers will tend to buy milk the most and with many items
+
+*Related Categories:*
+
+**{butter,whipped/sour cream}=\> {whole milk}:** Customers buying “butter” and "whipped/sour cream" are likely to buy “whole milk” with a confidence of 66%. This suggests an association between dairy products.
+
+*Unrelated Categories:*
+
+Rules like **{brown bread,whole milk}=\> {soda}** and **{bottled beer} =\> {other vegetables}** shows that customers buying brown bread/whole milk and bottled beer might not buy soda and other vegetables respectively
+
+**Q) Pick your own thresholds for lift and confidence; just be clear what these thresholds are and say why you picked them**
+
+-   **lift \> 3.5 :** A high lift value indicates a strong association between items. Generally, a lift value greater than 1 signifies a positive association. Choosing a threshold like 3.5 filters out rules that are significantly stronger than random chance.
+
+-   **confidence \> 0.6 :** By setting a confidence threshold of 60%, we can filter out weaker associations and focus on the more significant and reliable relationships between items.
+
+-   **lift \> 3 & confidence \> 0.6 :** This subset is chosen based on two criteria: rules with a “lift” value greater than 3, indicating strong associations, and rules with a “confidence” value higher than 0.6, indicating reliable predictions. By applying these filters, we can extract rules that not only represent strong connections between items but also provide dependable insights. This approach is useful for uncovering significant and practically relevant patterns in transaction data.
+
+```{r}
+inspect(subset(grocery_rule, subset=lift > 3.5))
+```
+
+**{herbs} =\> {root vegetables}:** Customers who buy both “herbs” are highly likely to also purchase “root vegetables” The high lift value of 3.95 indicates a strong association between these green food items.
+
+```{r}
+inspect(subset(grocery_rule, subset=confidence > 0.6))
+```
+
+**{whipped/sour cream, butter} =\> {whole milk}:** Similarly, customers who buy “whipped/sour cream” and "butter" have a confidence of 60.2% to buy “whole milk” These associations might be due to dairy products
+
+```{r}
+inspect(subset(grocery_rule, subset=lift > 3 & confidence > 0.6))
+```
+
+**{onions, root vegetables} =\> {other vegetables }:** With a confidence of 60.2% and a lift of 3.11, customers who buy “onions” and “root vegetables” are likely to purchase “other vegetables” as well. This rule could represent common vegetable cooking dishes.
+
+```{r}
+plot(grocery_rule, jitter =0)
+```
+
+-   It can be observed that high lift rules tend to have low support. High lift rules with low support can provide valuable insights about specific interactions between items that might not be immediately obvious from looking at high-support items.
+
+Swapping the axes and color scales:
+
+```{r}
+plot(grocery_rule, jitter = 0, measure = c("support", "lift"), shading = "confidence")
+```
+
+“Two key” plot: coloring is by size (order) of item set
+
+```{r}
+plot(grocery_rule, method='two-key plot', jitter =0)
+```
+
+-   The two key plot shows that most rules are lying in the lower support region, indicating that these item combinations are rare, but they have variations in their confidence
+
+-   Order Analysis: Majority of rules include combination of 3 items and 2 items where a single item association is very low. Most of them have low support and high variation in confidence
+
+```{r}
+grocery_graph = associations2igraph(subset(grocery_rule, lift>3), associationsAsNodes = FALSE)
+igraph::write_graph(grocery_graph, file='groceries.graphml', format = "graphml")
+```
+
+![Gephi Graph: Visualization of Grocery Item Associations](/Users/dhruvarora/Documents/UT Austin/Intro to ML- Part2/Exercises/gephi_file.png)
+
+
+
+From the gephi graph, we can interpret that:
+
+-   Root vegetables, other vegetables, whipper/sour cream more frequently associated with others in the grocery list as they have larger nodes
+
+-   {other vegetables} =\> {root vegetables}: This connection is strongly associated amongst other connections
+
+-   Smaller, more isolated nodes like chicken and margarine indicates that these items have fewer or weaker associations with other items in the dataset

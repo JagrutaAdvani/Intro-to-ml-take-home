@@ -1,0 +1,65 @@
+---
+title: "Question 1"
+output: html_document
+date: "2024-08-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Q1 \~ Probability Practice
+
+### Question- Part A
+
+It is provided that random clickers will click either one with equal probability which means they are mutually exclusive and exhaustive:
+
+P(Yes \| Random Clicker) = 0.5 P(No \| Random Clicker) = 0.5
+
+It is also provided that the expected probability of random clickers is 30%. Therefore,
+
+P(Random Clicker) = 0.3
+
+P(Truthful Clicker) = 1 - P(Random Clicker) = 1 - 0.3 = 0.7
+
+After trial period, probabilities of survey result is: P(Yes) = 0.65 P(No) = 0.35
+
+#### Q) What fraction of people who are truthful clickers answered yes?
+
+Using rule of total probability: P(Yes) = (P(Yes \| Truthful Clicker) \* P(Truthful Clicker)) + (P(Yes \| Random Clicker) \* P(Random Clicker))
+
+P(Yes \| Truthful Clicker) = (P(Yes) - (P(Yes \| Random Clicker) \* P(Random Clicker))) / P(Truthful Clicker)
+
+Therefore, P(Yes \| Truthful Clicker) =((0.65-(0.5\*0.3))/0.7
+
+Hence, Fraction of people who are truthful clickers and answered yes are 71.428%
+
+### Question- Part B
+
+Let say D stands for having Disease and nD stands for not having disease Also, +ve stands for positive and -ve stands for negative
+
+Therefore, it is provided that: P(D) = 0.000025 =\> P(nD) = 1 - 0.000025 = 0.99975
+
+Here, Sensitivity is 0.993
+
+Therefore, P(+ve \| D) = 0.993 P(-ve \| D) = 1 - 0.993 = 0.007
+
+Here, Specificity is 0.9999
+
+Therefore, P(-ve \| nD) = 0.9999 P(+ve \| nD) = 1 - 0.9999 = 0.0001
+
+#### Q) Suppose someone tests positive. What is the probability that they have the disease?
+
+Using Bayes Rule, we can calculate joint probabilities i.e, test being positive given Disease and test being positive given not having Disease:
+
+P(+ve , D) = P(+ve \| D) \* P(D) P(+ve, nD) = P(+ve \| nD) \* P(nD)
+
+P(D \| +ve) = (P(D) \* P(+ve \| D))/(P(D) \* P(+ve \| D) + P(nD) \* P(+ve \| nD))
+
+P(D \| +ve) = (0.000025 \* 0.993) / ((0.000025 \* 0.993) + (0.99975 \* 0.0001))
+
+P(D \| +ve) = 0.1989183 = 19.89%
+
+I have been assuming that the entire population went for the testing which is not possible. Therefore, there must be lesser false positives in our denominator
+
+Hence, the probability of someone having disease given that they tested positive will be greater than 19.89%
