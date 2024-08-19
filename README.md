@@ -25,7 +25,7 @@
 
 ## 🚋 Visual Storytelling Part 2: Capital Metro Data
 ### 📝 Solution
-- [Capital Metro](4.%20Visual%20story%20telling%20part%202:%20Capital%20Metro%20data/IML_HW_Q4.ipynb)
+- [Capital Metro] (4.%20Visual%20story%20telling%20part%202:%20Capital%20Metro%20data/IML_HW_Q4.ipynb)
 
 
 ## 🍷 Clustering and Dimensionality Reduction
