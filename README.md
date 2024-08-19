@@ -15,7 +15,7 @@
 
 ## 🎶 Wrangling the Billboard Top 100
 ### 📝 Solution
-- [Wrangling the Billboard Top 100 Solution](2.%20Wrangling%20the%20Billboard%20Top%20100/Q2_ML.Rmd))
+- [Wrangling the Billboard Top 100 Solution](2.%20Wrangling%20the%20Billboard%20Top%20100/Q2_ML.Rmd)
 - [Wrangling the Billboard Top 100 PDF](2.%20Wrangling%20the%20Billboard%20Top%20100/Question%202%20Wrangling%20the%20Billboard%20Top%20100.pdf)
 
 ## 🌿 Visual Storytelling Part 1: Green Buildings
